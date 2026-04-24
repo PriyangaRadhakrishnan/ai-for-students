@@ -277,12 +277,20 @@ function renderAttendance() {
         ${danger ? '<span style="color:var(--danger);font-size:11px;margin-left:4px">⚠️ Low</span>' : ''}
         <div style="font-size:12px;color:var(--text-muted)">${s.present}P / ${s.absent}A</div>
       </div>
-      <div style="display:flex;gap:6px">
-        <button class="att-btn" onclick="markAttendance('${s.id}','P')">P</button>
-        <button class="att-btn" style="background:var(--danger);color:#fff" onclick="markAttendance('${s.id}','A')">A</button>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="att-btn present" onclick="markAttendance('${s.id}','P')">P</button>
+        <button class="att-btn absent" onclick="markAttendance('${s.id}','A')">A</button>
+        <button class="btn btn-sm btn-danger" style="padding:6px 10px;font-size:12px" onclick="deleteSubject('${s.id}')">✕</button>
       </div>
     </div>`;
   }).join('');
+}
+
+function deleteSubject(id) {
+  if (!confirm('Delete this subject and all its attendance data?')) return;
+  state.subjects = state.subjects.filter(s => s.id !== id);
+  saveKey('subjects');
+  renderAttendance();
 }
 
 // ── NOTES ────────────────────────────────────────────────────────
