@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>College Hub — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --primary: #6C63FF; --primary-light: #F0EFFE; --accent: #00D9A5;
+    --danger: #FF6B6B; --bg: #FAFAFA; --card: #FFFFFF; --text: #2D2D2D;
+    --text-muted: #6B7280; --radius: 14px; --shadow: 0 2px 10px rgba(108,99,255,0.1);
+    --font: 'Poppins', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+
+  .container { width: 100%; max-width: 420px; }
+
+  .logo { text-align: center; margin-bottom: 32px; }
+  .logo-icon { font-size: 48px; }
+  .logo h1 { font-size: 24px; font-weight: 700; color: var(--primary); margin-top: 8px; }
+  .logo p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+  .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 28px 24px; }
+
+  .tabs { display: flex; background: var(--primary-light); border-radius: 10px; padding: 4px; margin-bottom: 24px; }
+  .tab { flex: 1; padding: 10px; text-align: center; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; color: var(--text-muted); border: none; background: none; font-family: var(--font); transition: all .2s; }
+  .tab.active { background: var(--primary); color: #fff; }
+
+  .form { display: none; flex-direction: column; gap: 14px; }
+  .form.active { display: flex; }
+
+  label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+  input, select { width: 100%; padding: 12px 14px; border: 1.5px solid #E5E7EB; border-radius: 10px; font-family: var(--font); font-size: 14px; outline: none; transition: border .2s; background: #fff; color: var(--text); }
+  input:focus, select:focus { border-color: var(--primary); }
+
+  .btn { padding: 14px; border-radius: 10px; border: none; font-family: var(--font); font-size: 15px; font-weight: 700; cursor: pointer; transition: all .2s; width: 100%; }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { opacity: .88; transform: translateY(-1px); }
+
+  .error { background: #FFF5F5; color: var(--danger); border: 1px solid #FECACA; border-radius: 8px; padding: 10px 14px; font-size: 13px; display: none; }
+  .error.show { display: block; }
+
+  .divider { text-align: center; font-size: 12px; color: var(--text-muted); margin: 4px 0; }
+
+  .avatar-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .avatar-opt { font-size: 28px; width: 48px; height: 48px; border-radius: 50%; border: 2px solid #E5E7EB; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; background: #fff; }
+  .avatar-opt.selected { border-color: var(--primary); background: var(--primary-light); }
+
+  .field-group { display: flex; flex-direction: column; gap: 6px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="logo">
+    <div class="logo-icon">🎓</div>
+    <h1>College Life Hub</h1>
+    <p>Your personal college companion</p>
+  </div>
+
+  <div class="card">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('signin')">Sign In</button>
+      <button class="tab" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+
+    <!-- SIGN IN -->
+    <form class="form active" id="form-signin" onsubmit="signIn(event)">
+      <div class="field-group">
+        <label>Username</label>
+        <input id="si-username" placeholder="Enter your username" autocomplete="username" />
+      </div>
+      <div class="field-group">
+        <label>Password</label>
+        <input id="si-password" type="password" placeholder="Enter your password" autocomplete="current-password" />
+      </div>
+      <div class="error" id="si-error"></div>
+      <button class="btn btn-primary" type="submit">Sign In →</button>
+    </form>
+
+    <!-- SIGN UP -->
+    <form class="form" id="form-signup" onsubmit="signUp(event)">
+      <div class="field-group">
+        <label>Your Name</label>
+        <input id="su-name" placeholder="e.g. Priyanga" />
+      </div>
+      <div class="field-group">
+        <label>Username</label>
+        <input id="su-username" placeholder="e.g. priyanga123" autocomplete="username" />
+      </div>
+      <div class="field-group">
+        <label>Password</label>
+        <input id="su-password" type="password" placeholder="Create a password" autocomplete="new-password" />
+      </div>
+      <div class="field-group">
+        <label>Course & Year</label>
+        <select id="su-course">
+          <option value="">Select...</option>
+          <option>1st Year CSE</option>
+          <option>2nd Year CSE</option>
+          <option>3rd Year CSE</option>
+          <option>4th Year CSE</option>
+          <option>1st Year ECE</option>
+          <option>2nd Year ECE</option>
+          <option>3rd Year ECE</option>
+          <option>4th Year ECE</option>
+          <option>1st Year Mechanical</option>
+          <option>2nd Year Mechanical</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>Pick an Avatar</label>
+        <div class="avatar-row" id="avatar-row">
+          <button type="button" class="avatar-opt selected" data-avatar="🧑‍💻">🧑‍💻</button>
+          <button type="button" class="avatar-opt" data-avatar="👩‍💻">👩‍💻</button>
+          <button type="button" class="avatar-opt" data-avatar="🧑‍🎓">🧑‍🎓</button>
+          <button type="button" class="avatar-opt" data-avatar="👩‍🎓">👩‍🎓</button>
+          <button type="button" class="avatar-opt" data-avatar="🦸">🦸</button>
+          <button type="button" class="avatar-opt" data-avatar="🧑‍🚀">🧑‍🚀</button>
+        </div>
+      </div>
+      <div class="error" id="su-error"></div>
+      <button class="btn btn-primary" type="submit">Create Account →</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // ── STORAGE ──────────────────────────────────────────────────────
+  const getUsers = () => JSON.parse(localStorage.getItem('hub:users') || '{}');
+  const saveUsers = (u) => localStorage.setItem('hub:users', JSON.stringify(u));
+  const setSession = (username) => localStorage.setItem('hub:session', username);
+
+  // Redirect if already logged in
+  if (localStorage.getItem('hub:session')) {
+    window.location.href = 'index.html';
+  }
+
+  // ── TABS ─────────────────────────────────────────────────────────
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', (i === 0) === (tab === 'signin')));
+    document.getElementById('form-signin').classList.toggle('active', tab === 'signin');
+    document.getElementById('form-signup').classList.toggle('active', tab === 'signup');
+  }
+
+  // ── AVATAR PICKER ────────────────────────────────────────────────
+  document.querySelectorAll('.avatar-opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.avatar-opt').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
+  });
+
+  function getSelectedAvatar() {
+    const sel = document.querySelector('.avatar-opt.selected');
+    return sel ? sel.dataset.avatar : '🧑‍💻';
+  }
+
+  // ── SIGN UP ──────────────────────────────────────────────────────
+  function signUp(e) {
+    e.preventDefault();
+    const name = document.getElementById('su-name').value.trim();
+    const username = document.getElementById('su-username').value.trim().toLowerCase();
+    const password = document.getElementById('su-password').value;
+    const course = document.getElementById('su-course').value;
+    const avatar = getSelectedAvatar();
+    const errEl = document.getElementById('su-error');
+
+    if (!name || !username || !password || !course) {
+      showError(errEl, 'Please fill in all fields.'); return;
+    }
+    if (username.length < 3) {
+      showError(errEl, 'Username must be at least 3 characters.'); return;
+    }
+    if (password.length < 4) {
+      showError(errEl, 'Password must be at least 4 characters.'); return;
+    }
+
+    const users = getUsers();
+    if (users[username]) {
+      showError(errEl, 'Username already taken. Try another.'); return;
+    }
+
+    users[username] = { name, username, password, course, avatar, joinedAt: new Date().toLocaleDateString('en-IN') };
+    saveUsers(users);
+    setSession(username);
+    window.location.href = 'index.html';
+  }
+
+  // ── SIGN IN ──────────────────────────────────────────────────────
+  function signIn(e) {
+    e.preventDefault();
+    const username = document.getElementById('si-username').value.trim().toLowerCase();
+    const password = document.getElementById('si-password').value;
+    const errEl = document.getElementById('si-error');
+
+    if (!username || !password) {
+      showError(errEl, 'Please enter username and password.'); return;
+    }
+
+    const users = getUsers();
+    if (!users[username]) {
+      showError(errEl, 'No account found. Sign up first.'); return;
+    }
+    if (users[username].password !== password) {
+      showError(errEl, 'Wrong password. Try again.'); return;
+    }
+
+    setSession(username);
+    window.location.href = 'index.html';
+  }
+
+  function showError(el, msg) {
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 3000);
+  }
+</script>
+</body>
+</html>

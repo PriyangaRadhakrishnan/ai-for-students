@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>My Profile — College Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --primary: #6C63FF; --primary-light: #F0EFFE; --accent: #00D9A5;
+    --success: #00D9A5; --warning: #FFB800; --danger: #FF6B6B;
+    --bg: #FAFAFA; --card: #FFFFFF; --text: #2D2D2D; --text-muted: #6B7280;
+    --radius: 14px; --shadow: 0 2px 10px rgba(108,99,255,0.08);
+    --font: 'Poppins', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  .topbar { background: var(--card); box-shadow: var(--shadow); padding: 14px 20px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 10; }
+  .back-btn { background: var(--primary-light); color: var(--primary); border: none; border-radius: 8px; padding: 8px 14px; font-family: var(--font); font-size: 13px; font-weight: 600; cursor: pointer; }
+  .topbar-title { font-size: 16px; font-weight: 700; }
+
+  .page { max-width: 500px; margin: auto; padding: 20px 16px 60px; }
+
+  /* PROFILE HERO */
+  .profile-hero { background: linear-gradient(135deg, var(--primary), #9B8FFF); border-radius: var(--radius); padding: 28px 20px; text-align: center; color: #fff; margin-bottom: 16px; }
+  .avatar { font-size: 64px; margin-bottom: 10px; }
+  .profile-name { font-size: 22px; font-weight: 700; }
+  .profile-username { font-size: 13px; opacity: .8; margin-top: 2px; }
+  .profile-course { background: rgba(255,255,255,0.2); border-radius: 99px; padding: 4px 14px; font-size: 12px; font-weight: 600; display: inline-block; margin-top: 10px; }
+
+  /* CARDS */
+  .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; margin-bottom: 14px; }
+  .card-title { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--text); }
+
+  /* STATS */
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .stat-box { background: var(--primary-light); border-radius: 12px; padding: 14px 10px; text-align: center; }
+  .stat-num { font-size: 22px; font-weight: 700; color: var(--primary); }
+  .stat-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  /* EDIT FORM */
+  .form-row { display: flex; flex-direction: column; gap: 10px; }
+  label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+  input, select { width: 100%; padding: 11px 14px; border: 1.5px solid #E5E7EB; border-radius: 10px; font-family: var(--font); font-size: 14px; outline: none; transition: border .2s; background: #fff; color: var(--text); }
+  input:focus, select:focus { border-color: var(--primary); }
+  .btn { padding: 12px 20px; border-radius: 10px; border: none; font-family: var(--font); font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; }
+  .btn-primary { background: var(--primary); color: #fff; width: 100%; }
+  .btn-danger { background: #FFF5F5; color: var(--danger); border: 1px solid #FECACA; width: 100%; margin-top: 8px; }
+  .btn:hover { opacity: .88; }
+
+  /* AVATAR PICKER */
+  .avatar-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .avatar-opt { font-size: 28px; width: 48px; height: 48px; border-radius: 50%; border: 2px solid #E5E7EB; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; background: #fff; }
+  .avatar-opt.selected { border-color: var(--primary); background: var(--primary-light); }
+
+  /* ACTIVITY */
+  .activity-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #F3F4F6; font-size: 13px; }
+  .activity-item:last-child { border-bottom: none; }
+  .activity-label { color: var(--text-muted); }
+  .activity-val { font-weight: 600; }
+
+  .success-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--success); color: #fff; padding: 12px 24px; border-radius: 99px; font-size: 14px; font-weight: 600; display: none; z-index: 999; }
+  .success-toast.show { display: block; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="back-btn" onclick="window.location.href='index.html'">← Back</button>
+  <span class="topbar-title">My Profile</span>
+</div>
+
+<div class="page">
+
+  <!-- Hero -->
+  <div class="profile-hero">
+    <div class="avatar" id="hero-avatar">🧑‍💻</div>
+    <div class="profile-name" id="hero-name">—</div>
+    <div class="profile-username" id="hero-username">@—</div>
+    <div class="profile-course" id="hero-course">—</div>
+  </div>
+
+  <!-- Stats -->
+  <div class="card">
+    <div class="card-title">📊 My Progress</div>
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-num" id="stat-assignments">0</div>
+        <div class="stat-label">Assignments Done</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="stat-expenses">₹0</div>
+        <div class="stat-label">Spent This Month</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="stat-habits">0</div>
+        <div class="stat-label">Habits Today</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="stat-lc">0</div>
+        <div class="stat-label">Problems Solved</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="stat-skills">0</div>
+        <div class="stat-label">Skills Tracked</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="stat-pomo">0</div>
+        <div class="stat-label">Focus Sessions</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity -->
+  <div class="card">
+    <div class="card-title">🗓️ Account Info</div>
+    <div class="activity-item">
+      <span class="activity-label">Member since</span>
+      <span class="activity-val" id="info-joined">—</span>
+    </div>
+    <div class="activity-item">
+      <span class="activity-label">Username</span>
+      <span class="activity-val" id="info-username">—</span>
+    </div>
+    <div class="activity-item">
+      <span class="activity-label">Course</span>
+      <span class="activity-val" id="info-course">—</span>
+    </div>
+    <div class="activity-item">
+      <span class="activity-label">Total Expenses Logged</span>
+      <span class="activity-val" id="info-txns">—</span>
+    </div>
+    <div class="activity-item">
+      <span class="activity-label">Notes Saved</span>
+      <span class="activity-val" id="info-notes">—</span>
+    </div>
+  </div>
+
+  <!-- Edit Profile -->
+  <div class="card">
+    <div class="card-title">✏️ Edit Profile</div>
+    <div class="form-row">
+      <label>Display Name</label>
+      <input id="edit-name" placeholder="Your name" />
+      <label>Course & Year</label>
+      <select id="edit-course">
+        <option>1st Year CSE</option>
+        <option>2nd Year CSE</option>
+        <option>3rd Year CSE</option>
+        <option>4th Year CSE</option>
+        <option>1st Year ECE</option>
+        <option>2nd Year ECE</option>
+        <option>3rd Year ECE</option>
+        <option>4th Year ECE</option>
+        <option>1st Year Mechanical</option>
+        <option>2nd Year Mechanical</option>
+        <option>Other</option>
+      </select>
+      <label>Avatar</label>
+      <div class="avatar-row" id="edit-avatar-row">
+        <button type="button" class="avatar-opt" data-avatar="🧑‍💻">🧑‍💻</button>
+        <button type="button" class="avatar-opt" data-avatar="👩‍💻">👩‍💻</button>
+        <button type="button" class="avatar-opt" data-avatar="🧑‍🎓">🧑‍🎓</button>
+        <button type="button" class="avatar-opt" data-avatar="👩‍🎓">👩‍🎓</button>
+        <button type="button" class="avatar-opt" data-avatar="🦸">🦸</button>
+        <button type="button" class="avatar-opt" data-avatar="🧑‍🚀">🧑‍🚀</button>
+      </div>
+      <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
+    </div>
+  </div>
+
+  <!-- Sign Out -->
+  <div class="card">
+    <div class="card-title">⚙️ Account</div>
+    <button class="btn btn-danger" onclick="signOut()">🚪 Sign Out</button>
+  </div>
+
+</div>
+
+<div class="success-toast" id="toast">✅ Profile updated!</div>
+
+<script>
+  const username = localStorage.getItem('hub:session');
+  if (!username) { window.location.href = 'auth.html'; }
+
+  const getUsers = () => JSON.parse(localStorage.getItem('hub:users') || '{}');
+  const saveUsers = (u) => localStorage.setItem('hub:users', JSON.stringify(u));
+  const loadData = (key, fb) => JSON.parse(localStorage.getItem(username + ':' + key)) ?? fb;
+
+  function loadProfile() {
+    const users = getUsers();
+    const user = users[username];
+    if (!user) { window.location.href = 'auth.html'; return; }
+
+    // Hero
+    document.getElementById('hero-avatar').textContent = user.avatar || '🧑‍💻';
+    document.getElementById('hero-name').textContent = user.name;
+    document.getElementById('hero-username').textContent = '@' + user.username;
+    document.getElementById('hero-course').textContent = user.course || '—';
+
+    // Account info
+    document.getElementById('info-joined').textContent = user.joinedAt || '—';
+    document.getElementById('info-username').textContent = '@' + user.username;
+    document.getElementById('info-course').textContent = user.course || '—';
+
+    // Stats
+    const assignments = loadData('assignments', []);
+    const expenses = loadData('expenses', { budget: 5000, transactions: [] });
+    const habits = loadData('habits', []);
+    const habitLog = loadData('habitLog', {});
+    const lcProblems = loadData('lcProblems', []);
+    const skills = loadData('skills', []);
+    const pomodoro = loadData('pomodoro', { sessions: 0, date: '' });
+    const notes = loadData('notes', []);
+
+    const doneTasks = assignments.filter(a => a.done).length;
+    const today = new Date().toISOString().slice(0, 10);
+    const monthTx = expenses.transactions.filter(t => t.date && t.date.startsWith(today.slice(0, 7)));
+    const monthSpent = monthTx.reduce((s, t) => s + t.amount, 0);
+    const todayLog = habitLog[new Date().toDateString()] || {};
+    const habitsDone = Object.values(todayLog).filter(Boolean).length;
+    const pomoToday = pomodoro.date === today ? pomodoro.sessions : 0;
+
+    document.getElementById('stat-assignments').textContent = doneTasks;
+    document.getElementById('stat-expenses').textContent = '₹' + monthSpent.toFixed(0);
+    document.getElementById('stat-habits').textContent = habitsDone + '/' + habits.length;
+    document.getElementById('stat-lc').textContent = lcProblems.length;
+    document.getElementById('stat-skills').textContent = skills.length;
+    document.getElementById('stat-pomo').textContent = pomoToday;
+    document.getElementById('info-txns').textContent = expenses.transactions.length + ' transactions';
+    document.getElementById('info-notes').textContent = notes.length + ' notes';
+
+    // Edit form pre-fill
+    document.getElementById('edit-name').value = user.name;
+    document.getElementById('edit-course').value = user.course || '';
+
+    // Avatar picker
+    document.querySelectorAll('.avatar-opt').forEach(btn => {
+      btn.classList.toggle('selected', btn.dataset.avatar === (user.avatar || '🧑‍💻'));
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.avatar-opt').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+      });
+    });
+  }
+
+  function saveProfile() {
+    const users = getUsers();
+    const name = document.getElementById('edit-name').value.trim();
+    const course = document.getElementById('edit-course').value;
+    const sel = document.querySelector('.avatar-opt.selected');
+    const avatar = sel ? sel.dataset.avatar : users[username].avatar;
+
+    if (!name) return;
+    users[username].name = name;
+    users[username].course = course;
+    users[username].avatar = avatar;
+    saveUsers(users);
+
+    loadProfile();
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  }
+
+  function signOut() {
+    localStorage.removeItem('hub:session');
+    window.location.href = 'auth.html';
+  }
+
+  loadProfile();
+</script>
+</body>
+</html>
