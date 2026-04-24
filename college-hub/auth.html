@@ -176,7 +176,6 @@
     getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
     sendEmailVerification, sendPasswordResetEmail, onAuthStateChanged
   } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-  import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
   // ── PASTE YOUR FIREBASE CONFIG HERE ─────────────────────────────
   // 1. Go to https://console.firebase.google.com
@@ -185,12 +184,13 @@
   // 4. In Firebase console: Authentication → Sign-in method → Enable Email/Password
   // 5. In Firebase console: Firestore Database → Create database (test mode)
   const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyBPWn8SrzgfYGHSJV1bC5gHNOjfS4-KoYw",
+    authDomain: "college-hub-92f7d.firebaseapp.com",
+    projectId: "college-hub-92f7d",
+    storageBucket: "college-hub-92f7d.firebasestorage.app",
+    messagingSenderId: "319395972623",
+    appId: "1:319395972623:web:fcadea313d338e7549057a",
+    measurementId: "G-H7JG5K7HX9"
   };
   // ────────────────────────────────────────────────────────────────
 
@@ -200,12 +200,11 @@
     document.getElementById('config-warning').classList.add('show');
   }
 
-  let app, auth, db, currentUnverifiedUser = null;
+  let app, auth, currentUnverifiedUser = null;
 
   if (isConfigured) {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
-    db = getFirestore(app);
 
     // If already signed in and verified, go to app
     onAuthStateChanged(auth, async (user) => {
@@ -266,12 +265,12 @@
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       const user = cred.user;
 
-      // Save profile to Firestore
-      await setDoc(doc(db, 'users', user.uid), {
+      // Save profile to localStorage (no Firestore needed)
+      localStorage.setItem('hub:profile', JSON.stringify({
         name, email, course, avatar,
         joinedAt: new Date().toLocaleDateString('en-IN'),
         uid: user.uid
-      });
+      }));
 
       // Send verification email
       await sendEmailVerification(user);
@@ -308,10 +307,18 @@
         return;
       }
 
-      // Load profile from Firestore and cache locally
-      const snap = await getDoc(doc(db, 'users', user.uid));
-      if (snap.exists()) {
-        localStorage.setItem('hub:profile', JSON.stringify({ ...snap.data(), uid: user.uid }));
+      // Profile already in localStorage from sign up
+      // If signing in on a new device, restore basic profile from Firebase user
+      const existingProfile = JSON.parse(localStorage.getItem('hub:profile') || '{}');
+      if (!existingProfile.uid || existingProfile.uid !== user.uid) {
+        localStorage.setItem('hub:profile', JSON.stringify({
+          name: user.displayName || user.email.split('@')[0],
+          email: user.email,
+          uid: user.uid,
+          avatar: '🧑‍💻',
+          joinedAt: new Date().toLocaleDateString('en-IN'),
+          course: ''
+        }));
       }
       localStorage.setItem('hub:session', user.uid);
       window.location.href = 'index.html';
