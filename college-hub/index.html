@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>My College Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --primary: #6C63FF;
+    --primary-light: #F0EFFE;
+    --accent: #00D9A5;
+    --success: #00D9A5;
+    --warning: #FFB800;
+    --danger: #FF6B6B;
+    --bg: #FAFAFA;
+    --card: #FFFFFF;
+    --text: #2D2D2D;
+    --text-muted: #6B7280;
+    --radius: 14px;
+    --shadow: 0 2px 10px rgba(108,99,255,0.08);
+    --font: 'Poppins', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* NAV */
+  .nav { background: var(--card); box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100; }
+  .nav-inner { max-width: 900px; margin: auto; display: flex; align-items: center; gap: 4px; padding: 0 16px; overflow-x: auto; }
+  .nav-btn { padding: 14px 16px; font-family: var(--font); font-size: 13px; font-weight: 500; border: none; background: none; cursor: pointer; color: var(--text-muted); white-space: nowrap; border-bottom: 3px solid transparent; transition: all .2s; }
+  .nav-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+  .nav-btn:hover { color: var(--primary); }
+
+  /* LAYOUT */
+  .page { display: none; max-width: 900px; margin: auto; padding: 20px 16px 80px; }
+  .page.active { display: block; }
+
+  /* CARDS */
+  .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; margin-bottom: 16px; }
+  .card-title { font-size: 15px; font-weight: 600; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+
+  /* GREETING */
+  .greeting { background: linear-gradient(135deg, var(--primary), #9B8FFF); color: #fff; border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+  .greeting h2 { font-size: 20px; font-weight: 700; }
+  .greeting p { font-size: 13px; opacity: .85; margin-top: 4px; }
+
+  /* MOOD */
+  .mood-row { display: flex; gap: 10px; }
+  .mood-btn { font-size: 26px; background: none; border: 2px solid transparent; border-radius: 50%; width: 52px; height: 52px; cursor: pointer; transition: all .2s; }
+  .mood-btn.selected, .mood-btn:hover { border-color: var(--primary); background: var(--primary-light); }
+
+  /* CLASSES */
+  .class-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #F3F4F6; }
+  .class-item:last-child { border-bottom: none; }
+  .class-time { font-size: 12px; color: var(--text-muted); min-width: 48px; }
+  .class-name { font-size: 14px; font-weight: 500; flex: 1; }
+  .class-loc { font-size: 12px; color: var(--text-muted); }
+
+  /* DUE ITEMS */
+  .due-item { padding: 10px 12px; border-radius: 10px; margin-bottom: 8px; border-left: 4px solid var(--warning); background: #FFFBEB; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+  .due-item.red { border-left-color: var(--danger); background: #FFF5F5; }
+  .due-item.green { border-left-color: var(--success); background: #F0FFF8; }
+  .due-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; background: rgba(0,0,0,0.06); }
+
+  /* BUDGET BAR */
+  .budget-bar-wrap { background: #F3F4F6; border-radius: 99px; height: 10px; margin: 8px 0; overflow: hidden; }
+  .budget-bar { height: 100%; border-radius: 99px; background: var(--accent); transition: width .4s; }
+  .budget-bar.warn { background: var(--warning); }
+  .budget-bar.over { background: var(--danger); }
+  .budget-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); }
+
+  /* TASKS */
+  .task-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #F3F4F6; }
+  .task-item:last-child { border-bottom: none; }
+  .task-check { width: 20px; height: 20px; border-radius: 6px; border: 2px solid #D1D5DB; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .2s; }
+  .task-check.done { background: var(--success); border-color: var(--success); color: #fff; font-size: 12px; }
+  .task-text { font-size: 14px; flex: 1; }
+  .task-text.done { text-decoration: line-through; color: var(--text-muted); }
+  .task-del { background: none; border: none; color: #D1D5DB; cursor: pointer; font-size: 16px; padding: 4px; }
+  .task-del:hover { color: var(--danger); }
+
+  /* QUICK ACTIONS */
+  .quick-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .quick-btn { flex: 1; min-width: 100px; padding: 14px 10px; border-radius: var(--radius); border: none; font-family: var(--font); font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; }
+  .quick-btn.primary { background: var(--primary); color: #fff; }
+  .quick-btn.secondary { background: var(--primary-light); color: var(--primary); }
+  .quick-btn:hover { opacity: .88; transform: translateY(-1px); }
+
+  /* FORMS */
+  .form-row { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+  .form-row label { font-size: 13px; font-weight: 500; color: var(--text-muted); }
+  input, select, textarea { width: 100%; padding: 10px 14px; border: 1.5px solid #E5E7EB; border-radius: 10px; font-family: var(--font); font-size: 14px; outline: none; transition: border .2s; background: #fff; }
+  input:focus, select:focus, textarea:focus { border-color: var(--primary); }
+  textarea { resize: vertical; min-height: 70px; }
+  .btn { padding: 12px 20px; border-radius: 10px; border: none; font-family: var(--font); font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; }
+  .btn-primary { background: var(--primary); color: #fff; width: 100%; }
+  .btn-primary:hover { opacity: .88; }
+  .btn-sm { padding: 6px 14px; font-size: 12px; border-radius: 8px; }
+  .btn-danger { background: #FFF5F5; color: var(--danger); border: 1px solid #FECACA; }
+
+  /* CATEGORY CHIPS */
+  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { padding: 8px 14px; border-radius: 99px; border: 1.5px solid #E5E7EB; font-size: 13px; cursor: pointer; transition: all .2s; background: #fff; font-family: var(--font); }
+  .chip.active, .chip.selected { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+  /* ASSIGNMENT ITEMS */
+  .assign-item { padding: 14px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid var(--warning); background: #FFFBEB; }
+  .assign-item.done { border-left-color: var(--success); background: #F0FFF8; opacity: .7; }
+  .assign-item.overdue { border-left-color: var(--danger); background: #FFF5F5; }
+  .assign-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .assign-title { font-size: 14px; font-weight: 600; }
+  .assign-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+  .assign-actions { display: flex; gap: 6px; margin-top: 10px; }
+
+  /* PROGRESS BAR */
+  .prog-wrap { background: #F3F4F6; border-radius: 99px; height: 6px; margin: 8px 0; overflow: hidden; }
+  .prog-bar { height: 100%; border-radius: 99px; background: var(--primary); transition: width .4s; }
+
+  /* SKILL / CERT ITEMS */
+  .skill-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #F3F4F6; }
+  .skill-item:last-child { border-bottom: none; }
+  .skill-badge { padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+  .badge-learning { background: #FEF3C7; color: #92400E; }
+  .badge-done { background: #D1FAE5; color: #065F46; }
+  .badge-planned { background: #EDE9FE; color: #5B21B6; }
+
+  /* EXPENSE ITEMS */
+  .exp-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #F3F4F6; }
+  .exp-item:last-child { border-bottom: none; }
+  .exp-icon { font-size: 22px; }
+  .exp-info { flex: 1; }
+  .exp-name { font-size: 14px; font-weight: 500; }
+  .exp-meta { font-size: 12px; color: var(--text-muted); }
+  .exp-amount { font-size: 15px; font-weight: 700; color: var(--danger); }
+
+  /* HABIT */
+  .habit-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #F3F4F6; }
+  .habit-item:last-child { border-bottom: none; }
+  .habit-check { width: 28px; height: 28px; border-radius: 8px; border: 2px solid #D1D5DB; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all .2s; flex-shrink: 0; }
+  .habit-check.done { background: var(--success); border-color: var(--success); color: #fff; }
+  .habit-streak { font-size: 12px; color: var(--warning); font-weight: 600; }
+
+  /* CLUB ITEMS */
+  .club-item { padding: 14px; border-radius: 12px; margin-bottom: 10px; background: var(--primary-light); border-left: 4px solid var(--primary); }
+  .club-name { font-size: 14px; font-weight: 600; color: var(--primary); }
+  .club-role { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .club-tasks { margin-top: 10px; }
+  .club-task { font-size: 13px; padding: 6px 0; border-bottom: 1px solid rgba(108,99,255,0.1); display: flex; align-items: center; gap: 8px; }
+  .club-task:last-child { border-bottom: none; }
+
+  /* EMPTY STATE */
+  .empty { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+  .empty-icon { font-size: 40px; margin-bottom: 10px; }
+  .empty p { font-size: 14px; }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; align-items: flex-end; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--card); border-radius: 20px 20px 0 0; padding: 24px 20px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+  .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 18px; }
+  .modal-close { float: right; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-muted); margin-top: -4px; }
+
+  /* SECTION DIVIDER */
+  .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-muted); margin: 18px 0 8px; }
+
+  /* ATTENDANCE */
+  .att-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #F3F4F6; }
+  .att-item:last-child { border-bottom: none; }
+  .att-subject { flex: 1; font-size: 14px; font-weight: 500; }
+  .att-pct { font-size: 15px; font-weight: 700; min-width: 44px; text-align: right; }
+  .att-pct.low { color: var(--danger); }
+  .att-pct.ok { color: var(--success); }
+  .att-btns { display: flex; gap: 6px; }
+  .att-btn { width: 32px; height: 32px; border-radius: 8px; border: none; font-size: 14px; cursor: pointer; font-weight: 700; }
+  .att-btn.present { background: #D1FAE5; color: #065F46; }
+  .att-btn.absent { background: #FEE2E2; color: #991B1B; }
+
+  /* TIMETABLE */
+  .tt-grid { display: grid; grid-template-columns: 60px repeat(6,1fr); gap: 2px; font-size: 11px; }
+  .tt-head { background: var(--primary-light); color: var(--primary); font-weight: 700; padding: 6px 4px; border-radius: 6px; text-align: center; }
+  .tt-time { color: var(--text-muted); padding: 6px 4px; text-align: right; font-size: 10px; display: flex; align-items: center; justify-content: flex-end; }
+  .tt-cell { background: #F9FAFB; border-radius: 6px; padding: 4px; min-height: 36px; }
+  .tt-cell.has-class { background: var(--primary-light); border-left: 3px solid var(--primary); }
+  .tt-cell-text { font-size: 10px; font-weight: 600; color: var(--primary); line-height: 1.3; }
+
+  /* MARKS */
+  .marks-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #F3F4F6; }
+  .marks-item:last-child { border-bottom: none; }
+  .marks-score { font-size: 18px; font-weight: 700; min-width: 52px; text-align: center; }
+  .marks-score.high { color: var(--success); }
+  .marks-score.mid { color: var(--warning); }
+  .marks-score.low { color: var(--danger); }
+
+  /* POMODORO */
+  .pomo-circle { width: 160px; height: 160px; border-radius: 50%; border: 8px solid var(--primary-light); display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 16px; position: relative; }
+  .pomo-time { font-size: 36px; font-weight: 700; color: var(--primary); }
+  .pomo-label { font-size: 12px; color: var(--text-muted); }
+  .pomo-btns { display: flex; gap: 10px; justify-content: center; }
+
+  /* LEETCODE */
+  .lc-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #F3F4F6; }
+  .lc-item:last-child { border-bottom: none; }
+  .lc-diff { padding: 2px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+  .lc-easy { background: #D1FAE5; color: #065F46; }
+  .lc-medium { background: #FEF3C7; color: #92400E; }
+  .lc-hard { background: #FEE2E2; color: #991B1B; }
+
+  /* PROJECT */
+  .proj-item { padding: 14px; border-radius: 12px; margin-bottom: 10px; background: #F8FAFC; border-left: 4px solid var(--accent); }
+  .proj-name { font-size: 14px; font-weight: 600; }
+  .proj-meta { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+
+  /* COMMUTE */
+  .commute-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #F3F4F6; font-size: 13px; }
+  .commute-item:last-child { border-bottom: none; }
+
+  /* READING */
+  .read-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #F3F4F6; }
+  .read-item:last-child { border-bottom: none; }
+
+  /* DARK MODE */
+  [data-theme="dark"] {
+    --bg: #0F172A; --card: #1E293B; --text: #F1F5F9; --text-muted: #94A3B8;
+    --shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+  [data-theme="dark"] input, [data-theme="dark"] select, [data-theme="dark"] textarea { background: #0F172A; color: #F1F5F9; border-color: #334155; }
+  [data-theme="dark"] .chip { background: #1E293B; color: #94A3B8; border-color: #334155; }
+  [data-theme="dark"] .tt-cell { background: #1E293B; }
+  [data-theme="dark"] .proj-item { background: #1E293B; }
+  [data-theme="dark"] .lc-item, [data-theme="dark"] .marks-item, [data-theme="dark"] .commute-item, [data-theme="dark"] .read-item { border-color: #334155; }
+
+  /* DARK TOGGLE */
+  .dark-toggle { position: fixed; bottom: 20px; right: 20px; width: 44px; height: 44px; border-radius: 50%; background: var(--card); box-shadow: 0 2px 12px rgba(0,0,0,0.15); border: none; font-size: 20px; cursor: pointer; z-index: 99; display: flex; align-items: center; justify-content: center; }
+
+  @media(max-width:500px) {
+    .quick-btn { min-width: 80px; font-size: 12px; }
+    .greeting h2 { font-size: 17px; }
+    .tt-grid { grid-template-columns: 44px repeat(6,1fr); }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="showPage('dashboard')">🏠 Home</button>
+    <button class="nav-btn" onclick="showPage('academics')">📚 Academics</button>
+    <button class="nav-btn" onclick="showPage('career')">💼 Career</button>
+    <button class="nav-btn" onclick="showPage('money')">💰 Money</button>
+    <button class="nav-btn" onclick="showPage('daily')">⚡ Daily</button>
+    <button class="nav-btn" onclick="showPage('clubs')">🎯 Clubs</button>
+    <button class="nav-btn" onclick="showPage('timetable')">🗓️ Timetable</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════ DASHBOARD -->
+<div id="page-dashboard" class="page active">
+
+  <div class="greeting">
+    <h2 id="greet-text">Good morning! 👋</h2>
+    <p id="greet-date"></p>
+  </div>
+
+  <!-- Mood -->
+  <div class="card">
+    <div class="card-title">☀️ How are you feeling today?</div>
+    <div class="mood-row" id="mood-row">
+      <button class="mood-btn" onclick="setMood('😴','Tired')" title="Tired">😴</button>
+      <button class="mood-btn" onclick="setMood('😐','Okay')" title="Okay">😐</button>
+      <button class="mood-btn" onclick="setMood('😊','Good')" title="Good">😊</button>
+      <button class="mood-btn" onclick="setMood('🔥','Pumped')" title="Pumped">🔥</button>
+    </div>
+  </div>
+
+  <!-- Today's Classes -->
+  <div class="card">
+    <div class="card-title">📅 Today's Classes
+      <button class="btn btn-sm btn-danger" style="margin-left:auto" onclick="openModal('modal-class')">+ Add</button>
+    </div>
+    <div id="classes-list"></div>
+  </div>
+
+  <!-- Due Soon -->
+  <div class="card">
+    <div class="card-title">⚠️ Due Soon</div>
+    <div id="due-soon-list"></div>
+  </div>
+
+  <!-- Budget Snapshot -->
+  <div class="card">
+    <div class="card-title">💰 Budget This Month</div>
+    <div id="budget-snapshot"></div>
+  </div>
+
+  <!-- Today's Tasks -->
+  <div class="card">
+    <div class="card-title">✅ Today's Tasks</div>
+    <div id="dash-tasks-list"></div>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <input id="dash-task-input" placeholder="Add a task..." style="flex:1" onkeydown="if(event.key==='Enter')addDashTask()" />
+      <button class="btn btn-primary" style="width:auto;padding:10px 16px" onclick="addDashTask()">+</button>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="card">
+    <div class="card-title">⚡ Quick Actions</div>
+    <div class="quick-row">
+      <button class="quick-btn primary" onclick="openModal('modal-expense')">💸 Log Expense</button>
+      <button class="quick-btn secondary" onclick="openModal('modal-assign')">📝 Add Assignment</button>
+      <button class="quick-btn secondary" onclick="showPage('daily')">🎯 Habits</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ ACADEMICS -->
+<div id="page-academics" class="page">
+
+  <!-- Attendance -->
+  <div class="card">
+    <div class="card-title">📊 Attendance
+      <button class="btn btn-sm btn-danger" style="margin-left:auto" onclick="openModal('modal-subject')">+ Subject</button>
+    </div>
+    <div id="attendance-list"></div>
+  </div>
+
+  <!-- Assignments -->
+  <div class="card">
+    <div class="card-title">📋 Assignments
+      <button class="btn btn-sm btn-danger" style="margin-left:auto" onclick="openModal('modal-assign')">+ Add</button>
+    </div>
+    <div id="assignments-list"></div>
+  </div>
+
+  <!-- Notes Quick Log -->
+  <div class="card">
+    <div class="card-title">📝 Quick Notes</div>
+    <div class="form-row">
+      <select id="note-subject">
+        <option value="">Select subject...</option>
+        <option>C Programming</option><option>Mathematics</option>
+        <option>Physics</option><option>English</option>
+        <option>Engineering Drawing</option><option>Other</option>
+      </select>
+      <textarea id="note-content" placeholder="Your note..."></textarea>
+      <button class="btn btn-primary" onclick="addNote()">Save Note</button>
+    </div>
+    <div id="notes-list"></div>
+  </div>
+
+  <!-- Marks Tracker -->
+  <div class="card">
+    <div class="card-title">📈 Marks / Internal Scores
+      <button class="btn btn-sm btn-danger" style="margin-left:auto" onclick="openModal('modal-marks')">+ Add</button>
+    </div>
+    <div id="marks-list"></div>
+  </div>
+
+  <!-- Pomodoro Timer -->
+  <div class="card">
+    <div class="card-title">⏱️ Focus Timer (Pomodoro)</div>
+    <div class="pomo-circle">
+      <div class="pomo-time" id="pomo-display">25:00</div>
+      <div class="pomo-label" id="pomo-label">🍅 Focus</div>
+    </div>
+    <div class="pomo-btns">
+      <button class="btn btn-primary" style="width:auto;padding:10px 24px" id="pomo-btn" onclick="togglePomo()">▶ Start</button>
+      <button class="btn" style="background:var(--primary-light);color:var(--primary);padding:10px 24px" onclick="resetPomo()">↺ Reset</button>
+    </div>
+    <div style="text-align:center;margin-top:12px;font-size:13px;color:var(--text-muted)" id="pomo-count">0 sessions today</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ CAREER -->
+<div id="page-career" class="page">
+
+  <!-- Skills -->
+  <div class="card">
+    <div class="card-title">🛠️ Skills Tracker
+      <button class="btn btn-sm btn-danger" style="margin-left:auto" onclick="openModal('modal-skill')">+ Add</button>
+    </div>
+    <div id="skills-list"></div>
+  </div>
+
+  <!-- Certifications -->
+  <div class="card">
+    <div class="card-title">🏅 Certifications
+      <button class="btn btn-sm btn-danger" style="margin-left:auto" onclick="openModal('modal-cert')">+ Add</button>
+    </div>
+    <div id="certs-list"></div>
+  </div>
+
+  <!-- Goals -->
+  <div class="card">
+    <div class="card-title">🎯 Semester Goals</div>
+    <div id="career-goals-list"></div>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <input id="career-goal-input" placeholder="e.g. Learn Python basics" style="flex:1" onkeydown="if(event.key==='Enter')addCareerGoal()" />
+      <button class="btn btn-primary" style="width:auto;padding:10px 16px" onclick="addCareerGoal()">+</button>
+    </div>
+  </div>
+
+  <!-- LeetCode / Coding Practice -->
+  <div class="card">
+    <div class="card-title">💻 Coding Practice Log
+      <button class="btn btn-sm btn-danger" style="margin-left:auto" onclick="openModal('modal-lc')">+ Add</button>
+    </div>
+    <div id="lc-stats" style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;"></div>
+    <div id="lc-list"></div>
+  </div>
+
+  <!-- Projects -->
+  <div class="card">
+    <div class="card-title">🔗 My Projects
+      <button class="btn btn-sm btn-danger" style="margin-left:auto" onclick="openModal('modal-project')">+ Add</button>
+    </div>
+    <div id="projects-list"></div>
+  </div>
+
+  <!-- Resume Bullets -->
+  <div class="card">
+    <div class="card-title">📄 Resume Bullet Builder</div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Log achievements as they happen — copy them to your resume later.</div>
+    <div id="resume-bullets-list"></div>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <input id="resume-bullet-input" placeholder="e.g. Built a web app using HTML/CSS/JS" style="flex:1" onkeydown="if(event.key==='Enter')addResumeBullet()" />
+      <button class="btn btn-primary" style="width:auto;padding:10px 16px" onclick="addResumeBullet()">+</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ MONEY -->
+<div id="page-money" class="page">
+
+  <!-- Summary -->
+  <div class="card">
+    <div class="card-title">💰 This Month
+      <button class="btn btn-sm btn-danger" style="margin-left:auto" onclick="openModal('modal-budget')">⚙️ Set Budget</button>
+    </div>
+    <div id="budget-snapshot"></div>
+  </div>
+
+  <!-- Log Expense -->
+  <div class="card">
+    <div class="card-title">➕ Log Expense</div>
+    <div class="form-row">
+      <label>Amount (₹)</label>
+      <input id="exp-amount" type="number" placeholder="0" />
+      <label>Category</label>
+      <div class="chip-row" id="exp-cat-chips">
+        <button class="chip active" data-cat="Food">🍕 Food</button>
+        <button class="chip" data-cat="Transport">🚌 Transport</button>
+        <button class="chip" data-cat="Academic">📚 Academic</button>
+        <button class="chip" data-cat="Personal">🎮 Personal</button>
+        <button class="chip" data-cat="Social">👥 Social</button>
+        <button class="chip" data-cat="Health">🏥 Health</button>
+        <button class="chip" data-cat="Other">❓ Other</button>
+      </div>
+      <label>Payment</label>
+      <div class="chip-row" id="exp-mode-chips">
+        <button class="chip active" data-mode="UPI">UPI</button>
+        <button class="chip" data-mode="Cash">Cash</button>
+        <button class="chip" data-mode="Card">Card</button>
+      </div>
+      <input id="exp-note" placeholder="Note (optional)" />
+      <button class="btn btn-primary" onclick="addExpense()">Add Expense</button>
+    </div>
+  </div>
+
+  <!-- Transactions + breakdown -->
+  <div id="money-transactions"></div>
+
+  <!-- Monthly History -->
+  <div class="card">
+    <div class="card-title">📅 Monthly History</div>
+    <div id="monthly-history"></div>
+  </div>
+
+  <!-- AI Analysis -->
+  <div class="card">
+    <div class="card-title">✨ AI Spending Analysis</div>
+    <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Get your free API key at <a href="https://console.groq.com" target="_blank">console.groq.com</a>, paste it below, then tap Analyse.</div>
+    <input id="groq-key" type="password" placeholder="Paste Groq API key here" style="margin-bottom:10px;" />
+    <button class="btn btn-primary" id="ai-analyse-btn" onclick="analyseExpenses()">✨ Analyse My Spending</button>
+    <div id="ai-result" style="margin-top:12px;"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ DAILY -->
+<div id="page-daily" class="page">
+
+  <!-- Habits -->
+  <div class="card">
+    <div class="card-title">🔁 Daily Habits
+      <button class="btn btn-sm btn-danger" style="margin-left:auto" onclick="openModal('modal-habit')">+ Add</button>
+    </div>
+    <div id="habits-list"></div>
+  </div>
+
+  <!-- Tasks -->
+  <div class="card">
+    <div class="card-title">✅ Today's Tasks</div>
+    <div id="daily-tasks-list"></div>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <input id="daily-task-input" placeholder="Add a task..." style="flex:1" onkeydown="if(event.key==='Enter')addDailyTask()" />
+      <button class="btn btn-primary" style="width:auto;padding:10px 16px" onclick="addDailyTask()">+</button>
+    </div>
+  </div>
+
+  <!-- Sleep Log -->
+  <div class="card">
+    <div class="card-title">😴 Sleep Log</div>
+    <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:12px;">
+      <div style="flex:1">
+        <label style="font-size:12px;color:var(--text-muted)">Slept at</label>
+        <input id="sleep-bed" type="time" value="23:00" />
+      </div>
+      <div style="flex:1">
+        <label style="font-size:12px;color:var(--text-muted)">Woke up</label>
+        <input id="sleep-wake" type="time" value="07:00" />
+      </div>
+      <button class="btn btn-primary" style="width:auto;padding:10px 16px" onclick="logSleep()">Log</button>
+    </div>
+    <div id="sleep-list"></div>
+  </div>
+
+  <!-- Commute Log -->
+  <div class="card">
+    <div class="card-title">🚌 Commute Log
+      <button class="btn btn-sm btn-danger" style="margin-left:auto" onclick="openModal('modal-commute')">+ Log</button>
+    </div>
+    <div id="commute-stats" style="display:flex;gap:16px;font-size:13px;margin-bottom:10px;color:var(--text-muted);"></div>
+    <div id="commute-list"></div>
+  </div>
+
+  <!-- Reading Tracker -->
+  <div class="card">
+    <div class="card-title">📖 Reading Tracker
+      <button class="btn btn-sm btn-danger" style="margin-left:auto" onclick="openModal('modal-reading')">+ Add</button>
+    </div>
+    <div id="reading-list"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ CLUBS -->
+<div id="page-clubs" class="page">
+
+  <div class="card">
+    <div class="card-title">🎯 My Clubs
+      <button class="btn btn-sm btn-danger" style="margin-left:auto" onclick="openModal('modal-club')">+ Add Club</button>
+    </div>
+    <div id="clubs-list"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📅 Upcoming Events
+      <button class="btn btn-sm btn-danger" style="margin-left:auto" onclick="openModal('modal-event')">+ Add Event</button>
+    </div>
+    <div id="events-list"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ MODALS -->
+
+<!-- Add Class -->
+<div class="modal-overlay" id="modal-class">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-class')">✕</button>
+    <div class="modal-title">📅 Add Class</div>
+    <div class="form-row">
+      <label>Subject</label>
+      <input id="class-name" placeholder="e.g. C Programming" />
+      <label>Day</label>
+      <select id="class-day">
+        <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+        <option>Thursday</option><option>Friday</option><option>Saturday</option>
+      </select>
+      <label>Time</label>
+      <input id="class-time" type="time" value="09:00" />
+      <label>Room (optional)</label>
+      <input id="class-room" placeholder="e.g. Block A, Room 101" />
+      <button class="btn btn-primary" onclick="addClass()">Add Class</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Assignment -->
+<div class="modal-overlay" id="modal-assign">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-assign')">✕</button>
+    <div class="modal-title">📝 Add Assignment</div>
+    <div class="form-row">
+      <label>Title</label>
+      <input id="assign-title" placeholder="e.g. C Lab Program 3" />
+      <label>Subject</label>
+      <input id="assign-subject" placeholder="e.g. C Programming" />
+      <label>Due Date</label>
+      <input id="assign-due" type="date" />
+      <button class="btn btn-primary" onclick="addAssignment()">Add Assignment</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Subject (Attendance) -->
+<div class="modal-overlay" id="modal-subject">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-subject')">✕</button>
+    <div class="modal-title">📊 Add Subject</div>
+    <div class="form-row">
+      <label>Subject Name</label>
+      <input id="subject-name" placeholder="e.g. Mathematics" />
+      <button class="btn btn-primary" onclick="addSubject()">Add Subject</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Skill -->
+<div class="modal-overlay" id="modal-skill">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-skill')">✕</button>
+    <div class="modal-title">🛠️ Add Skill</div>
+    <div class="form-row">
+      <label>Skill Name</label>
+      <input id="skill-name" placeholder="e.g. Python, DSA, Git" />
+      <label>Level</label>
+      <select id="skill-level">
+        <option value="Learning">Learning</option>
+        <option value="Intermediate">Intermediate</option>
+        <option value="Done">Done ✅</option>
+      </select>
+      <button class="btn btn-primary" onclick="addSkill()">Add Skill</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Cert -->
+<div class="modal-overlay" id="modal-cert">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-cert')">✕</button>
+    <div class="modal-title">🏅 Add Certification</div>
+    <div class="form-row">
+      <label>Certification Name</label>
+      <input id="cert-name" placeholder="e.g. NPTEL Python, AWS Cloud Practitioner" />
+      <label>Issuer / Platform</label>
+      <input id="cert-issuer" placeholder="e.g. NPTEL, Coursera, Udemy" />
+      <label>Date Completed</label>
+      <input id="cert-date" type="date" />
+      <button class="btn btn-primary" onclick="addCert()">Add Certification</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Habit -->
+<div class="modal-overlay" id="modal-habit">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-habit')">✕</button>
+    <div class="modal-title">🔁 Add Habit</div>
+    <div class="form-row">
+      <label>Habit</label>
+      <input id="habit-name" placeholder="e.g. Read for 20 mins, Exercise, No phone before sleep" />
+      <button class="btn btn-primary" onclick="addHabit()">Add Habit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Club -->
+<div class="modal-overlay" id="modal-club">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-club')">✕</button>
+    <div class="modal-title">🎯 Add Club</div>
+    <div class="form-row">
+      <label>Club Name</label>
+      <input id="club-name" placeholder="e.g. Coding Club, NSS, Drama Club" />
+      <label>Your Role</label>
+      <input id="club-role" placeholder="e.g. Member, Volunteer, Coordinator" />
+      <button class="btn btn-primary" onclick="addClub()">Add Club</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Event -->
+<div class="modal-overlay" id="modal-event">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-event')">✕</button>
+    <div class="modal-title">📅 Add Event</div>
+    <div class="form-row">
+      <label>Event Name</label>
+      <input id="event-name" placeholder="e.g. Hackathon, Cultural Fest" />
+      <label>Date</label>
+      <input id="event-date" type="date" />
+      <label>Description (optional)</label>
+      <input id="event-desc" placeholder="e.g. Coding Club event" />
+      <button class="btn btn-primary" onclick="addEvent()">Add Event</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Habit -->
+<div class="modal-overlay" id="modal-habit">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-habit')">✕</button>
+    <div class="modal-title">🔁 Add Habit</div>
+    <div class="form-row">
+      <label>Habit</label>
+      <input id="habit-name" placeholder="e.g. Read for 20 mins, Exercise" />
+      <button class="btn btn-primary" onclick="addHabit()">Add Habit</button>
+    </div>
+  </div>
+</div><!-- ═══════════════════════════════════════════════════════ TIMETABLE -->
+<div id="page-timetable" class="page">
+  <div class="card">
+    <div class="card-title">🗓️ Weekly Timetable
+      <button class="btn btn-sm btn-danger" style="margin-left:auto" onclick="openModal('modal-class')">+ Add Class</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <div id="timetable-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ NEW MODALS -->
+
+<!-- Marks -->
+<div class="modal-overlay" id="modal-marks">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-marks')">✕</button>
+    <div class="modal-title">📈 Add Score</div>
+    <div class="form-row">
+      <label>Subject</label>
+      <input id="marks-subject" placeholder="e.g. Mathematics" />
+      <label>Test / Exam Name</label>
+      <input id="marks-test" placeholder="e.g. Internal 1, Mid Sem" />
+      <label>Score</label>
+      <input id="marks-score" type="number" placeholder="e.g. 42" />
+      <label>Out of</label>
+      <input id="marks-max" type="number" placeholder="e.g. 50" value="50" />
+      <button class="btn btn-primary" onclick="addMarks()">Save Score</button>
+    </div>
+  </div>
+</div>
+
+<!-- LeetCode -->
+<div class="modal-overlay" id="modal-lc">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-lc')">✕</button>
+    <div class="modal-title">💻 Log Problem</div>
+    <div class="form-row">
+      <label>Problem Name / Number</label>
+      <input id="lc-name" placeholder="e.g. Two Sum, #1" />
+      <label>Topic</label>
+      <input id="lc-topic" placeholder="e.g. Arrays, Strings, DP" />
+      <label>Difficulty</label>
+      <div class="chip-row" id="lc-diff-chips">
+        <button class="chip selected" data-diff="Easy">🟢 Easy</button>
+        <button class="chip" data-diff="Medium">🟡 Medium</button>
+        <button class="chip" data-diff="Hard">🔴 Hard</button>
+      </div>
+      <label>Platform</label>
+      <select id="lc-platform">
+        <option>LeetCode</option>
+        <option>HackerRank</option>
+        <option>CodeChef</option>
+        <option>Codeforces</option>
+        <option>Other</option>
+      </select>
+      <button class="btn btn-primary" onclick="addLCProblem()">Log Problem</button>
+    </div>
+  </div>
+</div>
+
+<!-- Project -->
+<div class="modal-overlay" id="modal-project">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-project')">✕</button>
+    <div class="modal-title">🔗 Add Project</div>
+    <div class="form-row">
+      <label>Project Name</label>
+      <input id="proj-name" placeholder="e.g. Student Expense Tracker" />
+      <label>Tech Stack</label>
+      <input id="proj-tech" placeholder="e.g. HTML, CSS, JS" />
+      <label>GitHub / Link (optional)</label>
+      <input id="proj-link" placeholder="https://github.com/..." />
+      <label>Status</label>
+      <select id="proj-status">
+        <option value="planned">Planned</option>
+        <option value="building">Building</option>
+        <option value="done">Done</option>
+      </select>
+      <button class="btn btn-primary" onclick="addProject()">Add Project</button>
+    </div>
+  </div>
+</div>
+
+<!-- Budget setter -->
+<div class="modal-overlay" id="modal-budget">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-budget')">✕</button>
+    <div class="modal-title">⚙️ Set Monthly Budget</div>
+    <div class="form-row">
+      <label>Monthly Budget (₹)</label>
+      <input id="budget-input" type="number" placeholder="5000" />
+      <button class="btn btn-primary" onclick="saveBudget()">Save Budget</button>
+    </div>
+  </div>
+</div>
+
+<!-- Commute -->
+<div class="modal-overlay" id="modal-commute">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-commute')">✕</button>
+    <div class="modal-title">🚌 Log Commute</div>
+    <div class="form-row">
+      <label>Travel Time (minutes)</label>
+      <input id="commute-time" type="number" placeholder="e.g. 45" />
+      <label>Cost (₹)</label>
+      <input id="commute-cost" type="number" placeholder="e.g. 30" />
+      <label>Mode</label>
+      <div class="chip-row" id="commute-mode-chips">
+        <button class="chip selected" data-mode="Bus">🚌 Bus</button>
+        <button class="chip" data-mode="Auto">🛺 Auto</button>
+        <button class="chip" data-mode="Train">🚆 Train</button>
+        <button class="chip" data-mode="Bike">🏍️ Bike</button>
+        <button class="chip" data-mode="Walk">🚶 Walk</button>
+      </div>
+      <button class="btn btn-primary" onclick="addCommute()">Log</button>
+    </div>
+  </div>
+</div>
+
+<!-- Reading -->
+<div class="modal-overlay" id="modal-reading">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-reading')">✕</button>
+    <div class="modal-title">📖 Add Reading</div>
+    <div class="form-row">
+      <label>Title</label>
+      <input id="read-title" placeholder="e.g. Clean Code, The Pragmatic Programmer" />
+      <label>Type</label>
+      <div class="chip-row" id="read-type-chips">
+        <button class="chip selected" data-type="Book">📚 Book</button>
+        <button class="chip" data-type="Article">📰 Article</button>
+        <button class="chip" data-type="Tutorial">💻 Tutorial</button>
+        <button class="chip" data-type="Paper">📄 Paper</button>
+      </div>
+      <label>Status</label>
+      <select id="read-status">
+        <option value="planned">Want to Read</option>
+        <option value="reading">Reading</option>
+        <option value="done">Done</option>
+      </select>
+      <button class="btn btn-primary" onclick="addReading()">Add</button>
+    </div>
+  </div>
+</div>
+
+<button class="dark-toggle" onclick="toggleDark()" title="Toggle dark mode">🌙</button>
+
+<script src="app.js"></script>
+</body>
+</html>
