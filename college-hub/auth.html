@@ -17,8 +17,8 @@
 
   .container { width: 100%; max-width: 420px; }
 
-  .logo { text-align: center; margin-bottom: 32px; }
-  .logo-icon { font-size: 48px; }
+  .logo { text-align: center; margin-bottom: 28px; }
+  .logo-icon { font-size: 52px; }
   .logo h1 { font-size: 24px; font-weight: 700; color: var(--primary); margin-top: 8px; }
   .logo p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
 
@@ -31,24 +31,42 @@
   .form { display: none; flex-direction: column; gap: 14px; }
   .form.active { display: flex; }
 
+  .field-group { display: flex; flex-direction: column; gap: 6px; }
   label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
   input, select { width: 100%; padding: 12px 14px; border: 1.5px solid #E5E7EB; border-radius: 10px; font-family: var(--font); font-size: 14px; outline: none; transition: border .2s; background: #fff; color: var(--text); }
   input:focus, select:focus { border-color: var(--primary); }
 
   .btn { padding: 14px; border-radius: 10px; border: none; font-family: var(--font); font-size: 15px; font-weight: 700; cursor: pointer; transition: all .2s; width: 100%; }
   .btn-primary { background: var(--primary); color: #fff; }
-  .btn-primary:hover { opacity: .88; transform: translateY(-1px); }
+  .btn-primary:hover { opacity: .88; }
+  .btn-primary:disabled { opacity: .6; cursor: not-allowed; }
+  .btn-ghost { background: var(--primary-light); color: var(--primary); margin-top: 6px; }
 
-  .error { background: #FFF5F5; color: var(--danger); border: 1px solid #FECACA; border-radius: 8px; padding: 10px 14px; font-size: 13px; display: none; }
-  .error.show { display: block; }
-
-  .divider { text-align: center; font-size: 12px; color: var(--text-muted); margin: 4px 0; }
+  .msg { border-radius: 10px; padding: 12px 14px; font-size: 13px; display: none; line-height: 1.5; }
+  .msg.show { display: block; }
+  .msg.error { background: #FFF5F5; color: var(--danger); border: 1px solid #FECACA; }
+  .msg.success { background: #F0FFF8; color: #065F46; border: 1px solid #A7F3D0; }
+  .msg.info { background: var(--primary-light); color: #3730A3; border: 1px solid #C7D2FE; }
 
   .avatar-row { display: flex; gap: 10px; flex-wrap: wrap; }
-  .avatar-opt { font-size: 28px; width: 48px; height: 48px; border-radius: 50%; border: 2px solid #E5E7EB; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; background: #fff; }
+  .avatar-opt { font-size: 26px; width: 46px; height: 46px; border-radius: 50%; border: 2px solid #E5E7EB; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; background: #fff; }
   .avatar-opt.selected { border-color: var(--primary); background: var(--primary-light); }
 
-  .field-group { display: flex; flex-direction: column; gap: 6px; }
+  .forgot { text-align: right; font-size: 12px; color: var(--primary); cursor: pointer; font-weight: 600; }
+  .forgot:hover { text-decoration: underline; }
+
+  /* Verification screen */
+  .verify-screen { display: none; text-align: center; padding: 10px 0; }
+  .verify-screen.show { display: block; }
+  .verify-icon { font-size: 52px; margin-bottom: 12px; }
+  .verify-screen h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .verify-screen p { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px; }
+  .verify-email-badge { background: var(--primary-light); color: var(--primary); border-radius: 8px; padding: 8px 14px; font-size: 14px; font-weight: 600; display: inline-block; margin-bottom: 20px; }
+
+  /* Config screen */
+  .config-screen { display: none; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 12px; padding: 16px; margin-bottom: 16px; font-size: 13px; line-height: 1.7; }
+  .config-screen.show { display: block; }
+  .config-screen code { background: #FEF3C7; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
 </style>
 </head>
 <body>
@@ -60,44 +78,53 @@
     <p>Your personal college companion</p>
   </div>
 
+  <!-- Firebase config warning -->
+  <div class="config-screen" id="config-warning">
+    ⚠️ <strong>Firebase not configured yet.</strong><br>
+    To enable email sign in, add your Firebase config in <code>auth.html</code>.<br>
+    See the setup guide at the bottom of this page.
+  </div>
+
   <div class="card">
     <div class="tabs">
       <button class="tab active" onclick="switchTab('signin')">Sign In</button>
       <button class="tab" onclick="switchTab('signup')">Sign Up</button>
     </div>
 
-    <!-- SIGN IN -->
+    <!-- SIGN IN FORM -->
     <form class="form active" id="form-signin" onsubmit="signIn(event)">
       <div class="field-group">
-        <label>Username</label>
-        <input id="si-username" placeholder="Enter your username" autocomplete="username" />
+        <label>Email Address</label>
+        <input id="si-email" type="email" placeholder="you@college.edu" autocomplete="email" />
       </div>
       <div class="field-group">
         <label>Password</label>
-        <input id="si-password" type="password" placeholder="Enter your password" autocomplete="current-password" />
+        <input id="si-password" type="password" placeholder="Your password" autocomplete="current-password" />
+        <div class="forgot" onclick="forgotPassword()">Forgot password?</div>
       </div>
-      <div class="error" id="si-error"></div>
-      <button class="btn btn-primary" type="submit">Sign In →</button>
+      <div class="msg error" id="si-error"></div>
+      <div class="msg info" id="si-info"></div>
+      <button class="btn btn-primary" type="submit" id="si-btn">Sign In →</button>
     </form>
 
-    <!-- SIGN UP -->
+    <!-- SIGN UP FORM -->
     <form class="form" id="form-signup" onsubmit="signUp(event)">
       <div class="field-group">
         <label>Your Name</label>
         <input id="su-name" placeholder="e.g. Priyanga" />
       </div>
       <div class="field-group">
-        <label>Username</label>
-        <input id="su-username" placeholder="e.g. priyanga123" autocomplete="username" />
+        <label>Email Address</label>
+        <input id="su-email" type="email" placeholder="you@college.edu" autocomplete="email" />
       </div>
       <div class="field-group">
         <label>Password</label>
-        <input id="su-password" type="password" placeholder="Create a password" autocomplete="new-password" />
+        <input id="su-password" type="password" placeholder="Min 6 characters" autocomplete="new-password" />
       </div>
       <div class="field-group">
         <label>Course & Year</label>
         <select id="su-course">
-          <option value="">Select...</option>
+          <option value="">Select your course...</option>
           <option>1st Year CSE</option>
           <option>2nd Year CSE</option>
           <option>3rd Year CSE</option>
@@ -122,29 +149,225 @@
           <button type="button" class="avatar-opt" data-avatar="🧑‍🚀">🧑‍🚀</button>
         </div>
       </div>
-      <div class="error" id="su-error"></div>
-      <button class="btn btn-primary" type="submit">Create Account →</button>
+      <div class="msg error" id="su-error"></div>
+      <button class="btn btn-primary" type="submit" id="su-btn">Create Account →</button>
     </form>
+
+    <!-- EMAIL VERIFICATION SCREEN -->
+    <div class="verify-screen" id="verify-screen">
+      <div class="verify-icon">📧</div>
+      <h3>Check your email!</h3>
+      <p>We sent a verification link to:</p>
+      <div class="verify-email-badge" id="verify-email-display">—</div>
+      <p>Click the link in the email to verify your account, then come back and sign in.</p>
+      <div class="msg error" id="resend-error"></div>
+      <div class="msg success" id="resend-success"></div>
+      <button class="btn btn-primary" onclick="resendVerification()">Resend Email</button>
+      <button class="btn btn-ghost" onclick="backToSignIn()">← Back to Sign In</button>
+    </div>
+
   </div>
 </div>
 
-<script>
-  // ── STORAGE ──────────────────────────────────────────────────────
-  const getUsers = () => JSON.parse(localStorage.getItem('hub:users') || '{}');
-  const saveUsers = (u) => localStorage.setItem('hub:users', JSON.stringify(u));
-  const setSession = (username) => localStorage.setItem('hub:session', username);
+<!-- ── FIREBASE SDK ──────────────────────────────────────────── -->
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import {
+    getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+    sendEmailVerification, sendPasswordResetEmail, onAuthStateChanged
+  } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+  import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-  // Redirect if already logged in
-  if (localStorage.getItem('hub:session')) {
-    window.location.href = 'index.html';
+  // ── PASTE YOUR FIREBASE CONFIG HERE ─────────────────────────────
+  // 1. Go to https://console.firebase.google.com
+  // 2. Create a project → Add a web app
+  // 3. Copy the firebaseConfig object and paste it below
+  // 4. In Firebase console: Authentication → Sign-in method → Enable Email/Password
+  // 5. In Firebase console: Firestore Database → Create database (test mode)
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+  // ────────────────────────────────────────────────────────────────
+
+  const isConfigured = firebaseConfig.apiKey !== "YOUR_API_KEY";
+
+  if (!isConfigured) {
+    document.getElementById('config-warning').classList.add('show');
   }
 
-  // ── TABS ─────────────────────────────────────────────────────────
-  function switchTab(tab) {
+  let app, auth, db, currentUnverifiedUser = null;
+
+  if (isConfigured) {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+
+    // If already signed in and verified, go to app
+    onAuthStateChanged(auth, async (user) => {
+      if (user && user.emailVerified) {
+        window.location.href = 'index.html';
+      }
+    });
+  }
+
+  // ── HELPERS ──────────────────────────────────────────────────────
+  function setLoading(btnId, loading, text) {
+    const btn = document.getElementById(btnId);
+    btn.disabled = loading;
+    btn.textContent = loading ? '...' : text;
+  }
+  function showMsg(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg; el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 5000);
+  }
+  function clearMsgs(...ids) { ids.forEach(id => { const el = document.getElementById(id); if(el) el.classList.remove('show'); }); }
+
+  function firebaseError(code) {
+    const map = {
+      'auth/email-already-in-use': 'This email is already registered. Sign in instead.',
+      'auth/invalid-email': 'Please enter a valid email address.',
+      'auth/weak-password': 'Password must be at least 6 characters.',
+      'auth/user-not-found': 'No account found with this email.',
+      'auth/wrong-password': 'Wrong password. Try again or reset it.',
+      'auth/invalid-credential': 'Wrong email or password.',
+      'auth/too-many-requests': 'Too many attempts. Please wait a moment.',
+      'auth/network-request-failed': 'Network error. Check your connection.',
+    };
+    return map[code] || 'Something went wrong. Please try again.';
+  }
+
+  function getSelectedAvatar() {
+    const sel = document.querySelector('.avatar-opt.selected');
+    return sel ? sel.dataset.avatar : '🧑‍💻';
+  }
+
+  // ── SIGN UP ──────────────────────────────────────────────────────
+  window.signUp = async function(e) {
+    e.preventDefault();
+    if (!isConfigured) { showMsg('su-error', 'Firebase not configured yet. See setup guide above.'); return; }
+    clearMsgs('su-error');
+
+    const name = document.getElementById('su-name').value.trim();
+    const email = document.getElementById('su-email').value.trim();
+    const password = document.getElementById('su-password').value;
+    const course = document.getElementById('su-course').value;
+    const avatar = getSelectedAvatar();
+
+    if (!name || !email || !password || !course) { showMsg('su-error', 'Please fill in all fields.'); return; }
+
+    setLoading('su-btn', true, 'Creating account...');
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      const user = cred.user;
+
+      // Save profile to Firestore
+      await setDoc(doc(db, 'users', user.uid), {
+        name, email, course, avatar,
+        joinedAt: new Date().toLocaleDateString('en-IN'),
+        uid: user.uid
+      });
+
+      // Send verification email
+      await sendEmailVerification(user);
+
+      currentUnverifiedUser = user;
+      showVerifyScreen(email);
+
+    } catch (err) {
+      showMsg('su-error', firebaseError(err.code));
+    } finally {
+      setLoading('su-btn', false, 'Create Account →');
+    }
+  };
+
+  // ── SIGN IN ──────────────────────────────────────────────────────
+  window.signIn = async function(e) {
+    e.preventDefault();
+    if (!isConfigured) { showMsg('si-error', 'Firebase not configured yet. See setup guide above.'); return; }
+    clearMsgs('si-error', 'si-info');
+
+    const email = document.getElementById('si-email').value.trim();
+    const password = document.getElementById('si-password').value;
+    if (!email || !password) { showMsg('si-error', 'Please enter your email and password.'); return; }
+
+    setLoading('si-btn', true, 'Signing in...');
+    try {
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      const user = cred.user;
+
+      if (!user.emailVerified) {
+        currentUnverifiedUser = user;
+        showVerifyScreen(email);
+        await auth.signOut();
+        return;
+      }
+
+      // Load profile from Firestore and cache locally
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      if (snap.exists()) {
+        localStorage.setItem('hub:profile', JSON.stringify({ ...snap.data(), uid: user.uid }));
+      }
+      localStorage.setItem('hub:session', user.uid);
+      window.location.href = 'index.html';
+
+    } catch (err) {
+      showMsg('si-error', firebaseError(err.code));
+    } finally {
+      setLoading('si-btn', false, 'Sign In →');
+    }
+  };
+
+  // ── FORGOT PASSWORD ──────────────────────────────────────────────
+  window.forgotPassword = async function() {
+    if (!isConfigured) return;
+    const email = document.getElementById('si-email').value.trim();
+    if (!email) { showMsg('si-error', 'Enter your email above first.'); return; }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      showMsg('si-info', '✅ Password reset email sent! Check your inbox.');
+    } catch (err) {
+      showMsg('si-error', firebaseError(err.code));
+    }
+  };
+
+  // ── RESEND VERIFICATION ──────────────────────────────────────────
+  window.resendVerification = async function() {
+    if (!currentUnverifiedUser) return;
+    try {
+      await sendEmailVerification(currentUnverifiedUser);
+      showMsg('resend-success', '✅ Verification email resent!');
+    } catch (err) {
+      showMsg('resend-error', 'Could not resend. Try signing in again.');
+    }
+  };
+
+  // ── VERIFY SCREEN ────────────────────────────────────────────────
+  function showVerifyScreen(email) {
+    document.getElementById('form-signin').classList.remove('active');
+    document.getElementById('form-signup').classList.remove('active');
+    document.getElementById('verify-screen').classList.add('show');
+    document.getElementById('verify-email-display').textContent = email;
+    document.querySelectorAll('.tab').forEach(t => t.style.display = 'none');
+  }
+
+  window.backToSignIn = function() {
+    document.getElementById('verify-screen').classList.remove('show');
+    document.querySelectorAll('.tab').forEach(t => t.style.display = '');
+    switchTab('signin');
+  };
+
+  // ── TAB SWITCH ───────────────────────────────────────────────────
+  window.switchTab = function(tab) {
     document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', (i === 0) === (tab === 'signin')));
     document.getElementById('form-signin').classList.toggle('active', tab === 'signin');
     document.getElementById('form-signup').classList.toggle('active', tab === 'signup');
-  }
+  };
 
   // ── AVATAR PICKER ────────────────────────────────────────────────
   document.querySelectorAll('.avatar-opt').forEach(btn => {
@@ -154,70 +377,6 @@
     });
   });
 
-  function getSelectedAvatar() {
-    const sel = document.querySelector('.avatar-opt.selected');
-    return sel ? sel.dataset.avatar : '🧑‍💻';
-  }
-
-  // ── SIGN UP ──────────────────────────────────────────────────────
-  function signUp(e) {
-    e.preventDefault();
-    const name = document.getElementById('su-name').value.trim();
-    const username = document.getElementById('su-username').value.trim().toLowerCase();
-    const password = document.getElementById('su-password').value;
-    const course = document.getElementById('su-course').value;
-    const avatar = getSelectedAvatar();
-    const errEl = document.getElementById('su-error');
-
-    if (!name || !username || !password || !course) {
-      showError(errEl, 'Please fill in all fields.'); return;
-    }
-    if (username.length < 3) {
-      showError(errEl, 'Username must be at least 3 characters.'); return;
-    }
-    if (password.length < 4) {
-      showError(errEl, 'Password must be at least 4 characters.'); return;
-    }
-
-    const users = getUsers();
-    if (users[username]) {
-      showError(errEl, 'Username already taken. Try another.'); return;
-    }
-
-    users[username] = { name, username, password, course, avatar, joinedAt: new Date().toLocaleDateString('en-IN') };
-    saveUsers(users);
-    setSession(username);
-    window.location.href = 'index.html';
-  }
-
-  // ── SIGN IN ──────────────────────────────────────────────────────
-  function signIn(e) {
-    e.preventDefault();
-    const username = document.getElementById('si-username').value.trim().toLowerCase();
-    const password = document.getElementById('si-password').value;
-    const errEl = document.getElementById('si-error');
-
-    if (!username || !password) {
-      showError(errEl, 'Please enter username and password.'); return;
-    }
-
-    const users = getUsers();
-    if (!users[username]) {
-      showError(errEl, 'No account found. Sign up first.'); return;
-    }
-    if (users[username].password !== password) {
-      showError(errEl, 'Wrong password. Try again.'); return;
-    }
-
-    setSession(username);
-    window.location.href = 'index.html';
-  }
-
-  function showError(el, msg) {
-    el.textContent = msg;
-    el.classList.add('show');
-    setTimeout(() => el.classList.remove('show'), 3000);
-  }
 </script>
 </body>
 </html>

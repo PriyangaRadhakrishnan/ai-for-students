@@ -7,7 +7,6 @@ if (!SESSION_USER) { window.location.href = 'auth.html'; }
 const PREFIX = SESSION_USER + ':';
 const save = (key, data) => localStorage.setItem(PREFIX + key, JSON.stringify(data));
 const load = (key, fallback) => { try { const v = localStorage.getItem(PREFIX + key); return v !== null ? JSON.parse(v) : fallback; } catch { return fallback; } };
-
 // ── DEFAULT STATE ────────────────────────────────────────────────
 const DEFAULT_STATE = {
   classes: [],
@@ -94,17 +93,14 @@ function applyDark() {
 function renderGreeting() {
   const hours = new Date().getHours();
   const greet = hours < 12 ? 'Good morning' : hours < 17 ? 'Good afternoon' : 'Good evening';
-  const users = JSON.parse(localStorage.getItem('hub:users') || '{}');
-  const user = users[SESSION_USER];
-  const name = user ? user.name.split(' ')[0] : '';
+  const user = JSON.parse(localStorage.getItem('hub:profile') || '{}');
+  const name = user.name ? user.name.split(' ')[0] : '';
   const el = document.getElementById('greet-text');
   if (el) el.textContent = greet + (name ? ', ' + name : '') + ' 👋';
   const dateEl = document.getElementById('greet-date');
   if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
-  // Update profile nav avatar
   const navProfile = document.getElementById('nav-profile');
-  if (navProfile && user) navProfile.textContent = user.avatar || '🧑‍💻';
+  if (navProfile && user.avatar) navProfile.textContent = user.avatar;
 }
 
 // ── MOOD ─────────────────────────────────────────────────────────
