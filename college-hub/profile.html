@@ -181,9 +181,15 @@
 <div class="success-toast" id="toast">✅ Profile updated!</div>
 
 <script>
-  const username = localStorage.getItem('hub:session');
-  if (!username) { window.location.href = 'auth.html'; }
+  // Check if user is logged in
+  const session = localStorage.getItem('hub:session');
+  const profile = JSON.parse(localStorage.getItem('hub:profile') || '{}');
+  
+  if (!session || !profile.uid) { 
+    window.location.href = 'auth.html'; 
+  }
 
+  const username = session; // Firebase UID
   const getProfile = () => JSON.parse(localStorage.getItem('hub:profile') || '{}');
   const loadData = (key, fb) => JSON.parse(localStorage.getItem(username + ':' + key)) ?? fb;
 
