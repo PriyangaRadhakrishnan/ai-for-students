@@ -105,7 +105,7 @@ function renderGreeting() {
     dateEl.textContent = `${day}, ${date}`;
   }
   const navProfile = document.getElementById('nav-profile');
-  if (navProfile && user.avatar) navProfile.textContent = user.avatar;
+  if (navProfile && user.avatar) navProfile.textContent = user.avatar + ' Profile';
 }
 
 // ── MOOD ─────────────────────────────────────────────────────────
