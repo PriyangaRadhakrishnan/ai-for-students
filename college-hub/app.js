@@ -98,7 +98,12 @@ function renderGreeting() {
   const el = document.getElementById('greet-text');
   if (el) el.textContent = greet + (name ? ', ' + name : '') + ' 👋';
   const dateEl = document.getElementById('greet-date');
-  if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  if (dateEl) {
+    const now = new Date();
+    const day = now.toLocaleDateString('en-IN', { weekday: 'long' });
+    const date = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+    dateEl.textContent = `${day}, ${date}`;
+  }
   const navProfile = document.getElementById('nav-profile');
   if (navProfile && user.avatar) navProfile.textContent = user.avatar;
 }
