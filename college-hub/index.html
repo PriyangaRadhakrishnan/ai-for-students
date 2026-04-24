@@ -571,11 +571,22 @@
     <div class="form-row">
       <label>Subject</label>
       <input id="class-name" placeholder="e.g. C Programming" />
-      <label>Day</label>
-      <select id="class-day">
-        <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
-        <option>Thursday</option><option>Friday</option><option>Saturday</option>
+      <label>Type</label>
+      <select id="class-type" onchange="toggleClassType()">
+        <option value="recurring">Recurring (Weekly)</option>
+        <option value="onetime">One-time (Specific Date)</option>
       </select>
+      <div id="class-recurring-fields">
+        <label>Day</label>
+        <select id="class-day">
+          <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+          <option>Thursday</option><option>Friday</option><option>Saturday</option>
+        </select>
+      </div>
+      <div id="class-onetime-fields" style="display:none;">
+        <label>Date</label>
+        <input id="class-date" type="date" />
+      </div>
       <label>Time</label>
       <input id="class-time" type="time" value="09:00" />
       <label>Room (optional)</label>

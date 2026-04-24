@@ -126,14 +126,33 @@ function renderMood() {
 }
 
 // ── CLASSES ──────────────────────────────────────────────────────
+function toggleClassType() {
+  const type = v('class-type');
+  document.getElementById('class-recurring-fields').style.display = type === 'recurring' ? 'block' : 'none';
+  document.getElementById('class-onetime-fields').style.display = type === 'onetime' ? 'block' : 'none';
+}
+
 function addClass() {
-  const name = v('class-name'); const day = v('class-day');
-  const time = v('class-time'); const room = v('class-room');
-  if (!name || !day || !time) return;
-  state.classes.push({ id: uid(), name, day, time, room });
+  const name = v('class-name');
+  const type = v('class-type');
+  const time = v('class-time');
+  const room = v('class-room');
+  
+  if (!name || !time) return;
+  
+  if (type === 'recurring') {
+    const day = v('class-day');
+    if (!day) return;
+    state.classes.push({ id: uid(), name, day, time, room, type: 'recurring' });
+  } else {
+    const date = v('class-date');
+    if (!date) return;
+    state.classes.push({ id: uid(), name, date, time, room, type: 'onetime' });
+  }
+  
   saveKey('classes');
   closeModal('modal-class');
-  clearInputs(['class-name', 'class-day', 'class-time', 'class-room']);
+  clearInputs(['class-name', 'class-day', 'class-date', 'class-time', 'class-room']);
   renderClasses();
   renderTimetable();
 }
@@ -142,12 +161,18 @@ function renderClasses() {
   const el = document.getElementById('classes-list');
   if (!el) return;
   const todayDay = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-  const todayClasses = state.classes.filter(c => c.day === todayDay)
-    .sort((a, b) => a.time.localeCompare(b.time));
+  const todayDate = new Date().toISOString().split('T')[0];
+  
+  // Get recurring classes for today + one-time classes for today
+  const todayClasses = state.classes.filter(c => 
+    (c.type === 'recurring' && c.day === todayDay) || 
+    (c.type === 'onetime' && c.date === todayDate)
+  ).sort((a, b) => a.time.localeCompare(b.time));
+  
   if (!todayClasses.length) { el.innerHTML = '<div class="empty">No classes today 🎉</div>'; return; }
   el.innerHTML = todayClasses.map(c => `
     <div class="assign-item">
-      <span><strong>${c.time}</strong> — ${c.name}${c.room ? ' <small>('+c.room+')</small>' : ''}</span>
+      <span><strong>${c.time}</strong> — ${c.name}${c.room ? ' <small>('+c.room+')</small>' : ''}${c.type === 'onetime' ? ' <small style="color:var(--warning)">📅 One-time</small>' : ''}</span>
       <button class="btn btn-sm btn-danger" onclick="deleteClass('${c.id}')">✕</button>
     </div>`).join('');
 }
