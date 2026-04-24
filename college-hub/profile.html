@@ -180,37 +180,54 @@
 
 <div class="success-toast" id="toast">✅ Profile updated!</div>
 
-<script>
-  // Check if user is logged in
-  const session = localStorage.getItem('hub:session');
-  const profile = JSON.parse(localStorage.getItem('hub:profile') || '{}');
-  
-  if (!session || !profile.uid) { 
-    window.location.href = 'auth.html'; 
-  }
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getAuth, onAuthStateChanged, signOut as firebaseSignOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
-  const username = session; // Firebase UID
-  const getProfile = () => JSON.parse(localStorage.getItem('hub:profile') || '{}');
-  const loadData = (key, fb) => JSON.parse(localStorage.getItem(username + ':' + key)) ?? fb;
+  // Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyBPWn8SrzgfYGHSJV1bC5gHNOjfS4-KoYw",
+    authDomain: "college-hub-92f7d.firebaseapp.com",
+    projectId: "college-hub-92f7d",
+    storageBucket: "college-hub-92f7d.firebasestorage.app",
+    messagingSenderId: "1051088088088",
+    appId: "1:1051088088088:web:c0e0e0e0e0e0e0e0e0e0e0"
+  };
 
-  function loadProfile() {
-    const user = getProfile();
-    if (!user || !user.uid) { window.location.href = 'auth.html'; return; }
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  // Check authentication
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = 'auth.html';
+      return;
+    }
+    
+    // User is signed in, load profile
+    loadProfile(user);
+  });
+
+  function loadProfile(user) {
+    const profile = JSON.parse(localStorage.getItem('hub:profile') || '{}');
+    const username = user.uid;
+    
+    const loadData = (key, fb) => JSON.parse(localStorage.getItem(username + ':' + key)) ?? fb;
 
     // Hero
-    document.getElementById('hero-avatar').textContent = user.avatar || '🧑‍💻';
-    document.getElementById('hero-name').textContent = user.name || '—';
-    document.getElementById('hero-username').textContent = user.email || '—';
-    document.getElementById('hero-course').textContent = user.course || '—';
+    document.getElementById('hero-avatar').textContent = profile.avatar || '🧑‍💻';
+    document.getElementById('hero-name').textContent = profile.name || 'User';
+    document.getElementById('hero-username').textContent = profile.email || user.email;
+    document.getElementById('hero-course').textContent = profile.course || 'Not set';
 
     // Account info
-    document.getElementById('info-joined').textContent = user.joinedAt || '—';
-    document.getElementById('info-username').textContent = user.email || '—';
-    document.getElementById('info-course').textContent = user.course || '—';
+    document.getElementById('info-joined').textContent = profile.joinedAt || new Date().toLocaleDateString('en-IN');
+    document.getElementById('info-username').textContent = profile.email || user.email;
+    document.getElementById('info-course').textContent = profile.course || 'Not set';
 
     // Stats
-    const assignments = loadData('assignments', []);
-    const expenses = loadData('expenses', { budget: 5000, transactions: [] });
+    const assignments = loadData('assignments', { assignments: [] });
+    const expenses = loadData('expenses', { budget: { monthly: 5000 }, transactions: [] });
     const habits = loadData('habits', []);
     const habitLog = loadData('habitLog', {});
     const lcProblems = loadData('lcProblems', []);
@@ -218,10 +235,11 @@
     const pomodoro = loadData('pomodoro', { sessions: 0, date: '' });
     const notes = loadData('notes', []);
 
-    const doneTasks = assignments.filter(a => a.done).length;
+    const assignmentList = assignments.assignments || [];
+    const doneTasks = assignmentList.filter(a => a.status === 'completed').length;
     const today = new Date().toISOString().slice(0, 10);
     const monthTx = expenses.transactions.filter(t => t.date && t.date.startsWith(today.slice(0, 7)));
-    const monthSpent = monthTx.reduce((s, t) => s + t.amount, 0);
+    const monthSpent = monthTx.reduce((s, t) => s + (t.amount || 0), 0);
     const todayLog = habitLog[new Date().toDateString()] || {};
     const habitsDone = Object.values(todayLog).filter(Boolean).length;
     const pomoToday = pomodoro.date === today ? pomodoro.sessions : 0;
@@ -236,12 +254,12 @@
     document.getElementById('info-notes').textContent = notes.length + ' notes';
 
     // Edit form pre-fill
-    document.getElementById('edit-name').value = user.name;
-    document.getElementById('edit-course').value = user.course || '';
+    document.getElementById('edit-name').value = profile.name || '';
+    document.getElementById('edit-course').value = profile.course || '';
 
     // Avatar picker
     document.querySelectorAll('.avatar-opt').forEach(btn => {
-      btn.classList.toggle('selected', btn.dataset.avatar === (user.avatar || '🧑‍💻'));
+      btn.classList.toggle('selected', btn.dataset.avatar === (profile.avatar || '🧑‍💻'));
       btn.addEventListener('click', () => {
         document.querySelectorAll('.avatar-opt').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
@@ -249,8 +267,8 @@
     });
   }
 
-  function saveProfile() {
-    const profile = getProfile();
+  window.saveProfile = function() {
+    const profile = JSON.parse(localStorage.getItem('hub:profile') || '{}');
     const name = document.getElementById('edit-name').value.trim();
     const course = document.getElementById('edit-course').value;
     const sel = document.querySelector('.avatar-opt.selected');
@@ -260,19 +278,24 @@
     const updated = { ...profile, name, course, avatar };
     localStorage.setItem('hub:profile', JSON.stringify(updated));
 
-    loadProfile();
-    const toast = document.getElementById('toast');
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2500);
-  }
+    // Reload to show changes
+    location.reload();
+  };
 
-  function signOut() {
-    localStorage.removeItem('hub:session');
-    localStorage.removeItem('hub:profile');
-    window.location.href = 'auth.html';
-  }
-
-  loadProfile();
+  window.signOut = async function() {
+    try {
+      await firebaseSignOut(auth);
+      localStorage.removeItem('hub:session');
+      localStorage.removeItem('hub:profile');
+      window.location.href = 'auth.html';
+    } catch (err) {
+      console.error('Sign out error:', err);
+      // Force redirect anyway
+      localStorage.removeItem('hub:session');
+      localStorage.removeItem('hub:profile');
+      window.location.href = 'auth.html';
+    }
+  };
 </script>
 </body>
 </html>
