@@ -183,7 +183,7 @@
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
   import {
     getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-    sendEmailVerification, sendPasswordResetEmail, onAuthStateChanged
+    sendPasswordResetEmail, onAuthStateChanged
   } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
   // ── FIREBASE CONFIG ──────────────────────────────────────────────
@@ -203,15 +203,15 @@
     document.getElementById('config-warning').classList.add('show');
   }
 
-  let app, auth, currentUnverifiedUser = null;
+  let app, auth;
 
   if (isConfigured) {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
 
-    // If already signed in and verified, go to app
+    // If already signed in, go to app
     onAuthStateChanged(auth, async (user) => {
-      if (user && user.emailVerified) {
+      if (user) {
         window.location.href = 'index.html';
       }
     });
@@ -268,19 +268,17 @@
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       const user = cred.user;
 
-      // Save profile to localStorage (no Firestore needed)
+      // Save profile to localStorage
       const profile = {
         name, email, course, avatar,
         joinedAt: new Date().toLocaleDateString('en-IN'),
         uid: user.uid
       };
       localStorage.setItem('hub:profile', JSON.stringify(profile));
+      localStorage.setItem('hub:session', user.uid);
 
-      // Send verification email
-      await sendEmailVerification(user);
-
-      currentUnverifiedUser = user;
-      showVerifyScreen(email);
+      // Redirect to app immediately - no email verification needed
+      window.location.href = 'index.html';
 
     } catch (err) {
       showMsg('su-error', firebaseError(err.code));
@@ -304,14 +302,7 @@
       const cred = await signInWithEmailAndPassword(auth, email, password);
       const user = cred.user;
 
-      if (!user.emailVerified) {
-        currentUnverifiedUser = user;
-        showVerifyScreen(email);
-        await auth.signOut();
-        return;
-      }
-
-      // Profile already in localStorage from signup, just set session
+      // Set session and redirect immediately - no verification check
       localStorage.setItem('hub:session', user.uid);
       window.location.href = 'index.html';
 
